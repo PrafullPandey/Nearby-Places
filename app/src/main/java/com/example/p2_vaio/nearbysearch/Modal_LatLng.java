@@ -8,6 +8,15 @@ public class Modal_LatLng {
 
     private double latitude ;
     private double longitude;
+    private String name ;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public double getLongitude() {
         return longitude;
@@ -31,6 +40,7 @@ public class Modal_LatLng {
         return "Modal_LatLng{" +
                 "latitude=" + latitude +
                 ", longitude=" + longitude +
-                '}';
+                ", name='" + name + '\'' +
+                "}\n";
     }
 }

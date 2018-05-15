@@ -43,7 +43,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
     private static final String TAG = "MapsActivity";
     String url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=%s&key=%s";
     public ArrayList<Modal_LatLng> location = new ArrayList<>();
-    public Modal_LatLng modal_latLng = new Modal_LatLng();
+    public Modal_LatLng modal_latLng ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,16 +161,18 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
             JSONObject data = new JSONObject(s);
             JSONArray results = data.getJSONArray("results");
             for(int i=0 ; i<results.length();i++){
-                JSONObject index = results.getJSONObject(i);
                 try{
+                    JSONObject index = results.getJSONObject(i);
+
                     Double lat = index.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
                     Double lng = index.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
-                    Log.d(TAG, "parseJSONForLocation: "+lat + "\n"+lng);
-                    if(lat != null && lng != null) {
+                    String name = index.getString("name");
+                    modal_latLng = new Modal_LatLng();
                         modal_latLng.setLatitude(lat);
                         modal_latLng.setLongitude(lng);
+                        modal_latLng.setName(name);
                         location.add(modal_latLng);
-                    }
+
                 }catch (Exception e){
                     e.printStackTrace();
                 }
