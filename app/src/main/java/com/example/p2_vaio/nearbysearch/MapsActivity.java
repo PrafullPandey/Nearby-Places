@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -21,6 +22,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
@@ -41,7 +50,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        getData();
     }
 
 
@@ -72,16 +80,16 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
         SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
         searchView.setSearchableInfo(searchableInfo);
 
-
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
                 Log.d(TAG, "onQueryTextSubmit: "+s);
-//                SharedPreferences sharedPrefrences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-//                sharedPrefrences.edit().putString(FLICKR_QUERY , s).apply();
-
-                String.format(url,);
+                String formated_url = String.format(url,s,getResources().getString(R.string.google_key));
+                formated_url = formated_url.replaceAll(" ","+");
+                Log.d(TAG, "onQueryTextSubmit: "+formated_url);
                 searchView.clearFocus();
+                GetData getData = new GetData();
+                getData.execute(formated_url);
                 return true;
             }
 
@@ -90,6 +98,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
                 return false;
             }
         });
+
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
@@ -97,11 +106,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
                 return false;
             }
         });
-
-        Log.d(TAG, "onCreateOptionsMenu: returned true" );
-
-
-
 
         return true;
     }
@@ -113,5 +117,33 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    public class GetData extends AsyncTask<String , Void , Void>{
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            Log.d(TAG, "doInBackground: ");
+            URL url ;
+            HttpURLConnection httpURLConnection =null;
+            try {
+                url = new URL(strings[0]);
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                StringBuilder total = new StringBuilder();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    total.append(line);
+                }
+                Log.d(TAG, "doInBackground: "+total);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            return null;
+        }
     }
 }
