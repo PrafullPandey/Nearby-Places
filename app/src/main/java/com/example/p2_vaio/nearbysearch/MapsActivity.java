@@ -23,6 +23,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,6 +34,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
@@ -37,6 +42,8 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
     private SearchView searchView;
     private static final String TAG = "MapsActivity";
     String url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=%s&key=%s";
+    public ArrayList<Modal_LatLng> location = new ArrayList<>();
+    public Modal_LatLng modal_latLng = new Modal_LatLng();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,13 +144,38 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
                     total.append(line);
                 }
                 Log.d(TAG, "doInBackground: "+total);
+                parseJSONForLocation(total.toString());
 
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
 
 
             return null;
+        }
+
+        private void parseJSONForLocation(String s) throws JSONException {
+
+            JSONObject data = new JSONObject(s);
+            JSONArray results = data.getJSONArray("results");
+            for(int i=0 ; i<results.length();i++){
+                JSONObject index = results.getJSONObject(i);
+                try{
+                    Double lat = index.getJSONObject("geometry").getJSONObject("location").getDouble("lat");
+                    Double lng = index.getJSONObject("geometry").getJSONObject("location").getDouble("lng");
+                    Log.d(TAG, "parseJSONForLocation: "+lat + "\n"+lng);
+                    if(lat != null && lng != null) {
+                        modal_latLng.setLatitude(lat);
+                        modal_latLng.setLongitude(lng);
+                        location.add(modal_latLng);
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            Log.d(TAG, "parseJSONForLocation: "+location.toString());
         }
     }
 }
