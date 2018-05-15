@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -73,10 +74,10 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
+        /*// Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
     }
 
     @Override
@@ -128,6 +129,32 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
 
     public class GetData extends AsyncTask<String , Void , Void>{
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Log.d(TAG, "onPostExecute: "+location.toString());
+            // add marker with label on to map
+            for(int i = 0 ; i<(location.size()>10?10:location.size());i++) {
+                addMarkerToMap(location.get(i));
+            }
+
+
+        }
+
+        private void addMarkerToMap(Modal_LatLng modal_latLng) {
+            Double lat = modal_latLng.getLatitude();
+            Double lng = modal_latLng.getLongitude();
+            String name = modal_latLng.getName();
+
+            //add marker
+            LatLng result = new LatLng(lat, lng);
+            mMap.addMarker(new MarkerOptions().position(result).title(name));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(result));
+            mMap.animateCamera(CameraUpdateFactory.zoomBy(10.0f));
+
+
+
+        }
 
         @Override
         protected Void doInBackground(String... strings) {
@@ -177,7 +204,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
                     e.printStackTrace();
                 }
             }
-            Log.d(TAG, "parseJSONForLocation: "+location.toString());
         }
     }
 }
